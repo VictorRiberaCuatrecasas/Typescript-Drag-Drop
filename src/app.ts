@@ -1,4 +1,34 @@
-//autobind decorator -> 
+//Validation
+interface Validatable {
+    value: string | number;
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+}
+
+function validate(validatableInput: Validatable){
+    let isValid = true;
+    if (validatableInput.required){
+        isValid = isValid && validatableInput.value.toString().trim().length !== 0;
+    }
+    if (validatableInput.minLength != null && typeof validatableInput.value === "string"){
+        isValid = isValid && validatableInput.value.length > validatableInput.minLength;
+    }
+    if (validatableInput.maxLength != null && typeof validatableInput.value === "string"){
+        isValid = isValid && validatableInput.value.length < validatableInput.maxLength;
+    }
+    if (validatableInput.min != null && typeof validatableInput.value === "number"){
+        isValid = isValid && validatableInput.value > validatableInput.min;
+    }
+    if (validatableInput.max != null && typeof validatableInput.value === "number"){
+        isValid = isValid && validatableInput.value < validatableInput.max;
+    }
+    return isValid
+}
+
+//autobind decorator 
 function autobind(_: any, _2: string, descriptor: PropertyDescriptor){ // _ as parameter allows u to put parameters that you are not going to use when you need to access other parameter positions
     const originalMethod = descriptor.value;
     const adjDescriptor: PropertyDescriptor = {
@@ -27,7 +57,7 @@ class ProjectInput {
 
         const importedTemplate: DocumentFragment = document.importNode(this.templateElement.content, true);
         this.element = importedTemplate.firstElementChild as HTMLFormElement;
-        this.element.id="user-input" //css styling
+        this.element.id = "user-input" //css styling
 
         this.titleInputElement = this.element.querySelector("#title") as HTMLInputElement;
         this.descriptionInputElement = this.element.querySelector("#description") as HTMLInputElement;
@@ -42,10 +72,26 @@ class ProjectInput {
         const enteredDescription = this.descriptionInputElement.value;
         const enteredPeople = this.peopleInputElement.value;
 
+        const titleValidatable: Validatable = {
+            value: enteredTitle,
+            required: true
+        }
+        const descriptionValidatable: Validatable = {
+            value: enteredDescription,
+            required: true,
+            minLength: 5
+        }
+        const peopleValidatable: Validatable = {
+            value: +enteredPeople,
+            required: true,
+            min: 1,
+            max: 10
+        }
+
         if (
-            enteredTitle.trim().length === 0 ||
-            enteredDescription.trim().length === 0 ||
-            enteredPeople.trim().length === 0
+            !validate(titleValidatable) ||
+            !validate(descriptionValidatable) ||
+            !validate(peopleValidatable) 
         ){
             alert("invalid input, please try again!");
             return;
@@ -71,6 +117,9 @@ class ProjectInput {
             this.clearInput()
         }
     }
+
+
+
 
     private configure(){
         this.element.addEventListener("submit", this.submitHandler) 
