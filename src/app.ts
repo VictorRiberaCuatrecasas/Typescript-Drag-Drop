@@ -41,6 +41,35 @@ function autobind(_: any, _2: string, descriptor: PropertyDescriptor){ // _ as p
     return adjDescriptor
 }
 
+//project list class
+class ProjectList {
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    element: HTMLElement;
+
+    constructor(private type:"active" | "finished" ){
+        this.templateElement = document.getElementById("project-list")! as HTMLTemplateElement;
+        this.hostElement = document.getElementById("app")! as HTMLDivElement;
+
+        const importedTemplate: DocumentFragment = document.importNode(this.templateElement.content, true);
+        this.element = importedTemplate.firstElementChild as HTMLElement;
+        this.element.id = `${this.type}-projects`; //css styling
+
+        this.attach();
+        this.renderContent()
+    }
+
+    private renderContent(){
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector("ul")!.id = listId; // ! simbol tells typescript it will at least find one ul, without it, it doesnt know for sure and gives error
+        this.element.querySelector("h2")!.textContent = this.type.toUpperCase() + " PROJECTS";
+    }
+
+    private attach(){
+        this.hostElement.insertAdjacentElement("beforeend", this.element); 
+    }
+}
+
 //project input class
 class ProjectInput {
     templateElement: HTMLTemplateElement;
@@ -130,4 +159,7 @@ class ProjectInput {
     }
 }
 
-const setup = new ProjectInput()
+//instanciating classes
+const setup = new ProjectInput() ;
+const activeProjectList = new ProjectList("active");
+const finishedProjectList = new ProjectList("finished");
